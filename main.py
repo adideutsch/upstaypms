@@ -13,5 +13,9 @@ app.config.DB_USER = 'upstayapp'
 async def test(request):
     return json({'hello': 'world'})
 
+@app.route("/query_string")
+def query_string(request):
+  return json({ "parsed": True, "args": request.args, "url": request.url, "query_string": request.query_string })
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8000)
+    app.run(host='0.0.0.0', port=80)
