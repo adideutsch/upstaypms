@@ -10,18 +10,6 @@ app.config.DB_NAME = DB_NAME
 app.config.DB_USER = DB_USER
 
 
-# EXAMPLE ENDPOINT 1
-@app.route('/')
-async def test(request):
-    return json({'hello': 'world'})
-
-
-# EXAMPLE ENDPOINT 2
-@app.route("/query_string")
-async def query_string(request):
-    return json({"parsed": True, "args": request.args, "url": request.url, "query_string": request.query_string})
-
-
 @app.route("/add_hotel")
 async def add_hotel_endpoint(request):
     hotel_name = request.args["hotel_name"][0]
@@ -52,6 +40,27 @@ async def add_reservation_endpoint(request):
     arrival_date = request.args["arrival_date"][0]
     departure_date = request.args["departure_date"][0]
     status = request.args["status"][0]
-
     reservation_id = model.add_reservation(hotel_id, room_type, arrival_date, departure_date, status)
-    return json({"reservation_id": reservation_id})
+    if reservation_id == model.OPERATION_ERROR_RETURN_CODE:
+        return json({"success": False})
+    return json({"success": True, "reservation_id": reservation_id})
+
+
+@app.route("/get_reservation")
+async def get_reservation_endpoint(request):
+    reservation_id = request.args["reservation_id"][0]
+    reservation_dict = model.get_reservation(reservation_id)
+    return json(reservation_dict)
+
+
+@app.route("/list_inventory")
+async def list_inventory_endpoint(request):
+    hotel_id = request.args["hotel_id"][0]
+    start_date = request.args["start_date"][0]
+    end_date = request.args["end_date"][0]
+    print(f"running list_inventory with ({hotel_id}, {start_date}, {end_date})")
+    inventory = model.list_inventory(hotel_id, start_date, end_date)
+    print("DONE")
+    if inventory == model.OPERATION_ERROR_RETURN_CODE:
+        return json({"success": False})
+    return json({"success": True, "inventory": inventory})
