@@ -1,6 +1,7 @@
 import sqlalchemy as db
 from sqlalchemy import Column, Integer, String, Date, Enum
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker
 
 from config import DB_SERVER, DB_NAME, DB_USER, DB_PASSWORD, DB_PORT
 
@@ -48,6 +49,18 @@ class HotelInventory(Base):
                                f"room_inventory='{self.room_inventory}')>"
 
 
+def build_tables(engine):
+    Base.metadata.create_all(engine)
+
+def add_hotel(session, hotel_name):
+    hotel = Hotels(hotel_name=hotel_name)
+    session.add(hotel)
+    session.commit()
+
+
 if __name__ == '__main__':
     engine = db.create_engine(f'postgresql+psycopg2://{DB_USER}:{DB_PASSWORD}@{DB_SERVER}:{DB_PORT}/{DB_NAME}')
-    Base.metadata.create_all(engine)
+    # build_tables(engine)
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    add_hotel(session=session, hotel_name="Leonardo Plaza Ashdod")
