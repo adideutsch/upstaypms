@@ -1,16 +1,10 @@
 import datetime
-import enum
 from sqlalchemy import Column, Integer, String, Date, Enum
 from sqlalchemy.ext.declarative import declarative_base
 
 from db_utils import get_db_session
 
 Base = declarative_base()
-
-
-class StatusEnum(enum.Enum):
-    Active = "Active"
-    Cancelled = "Cancelled"
 
 
 class Reservations(Base):
@@ -20,8 +14,7 @@ class Reservations(Base):
     room_type = Column(String)
     arrival_date = Column(Date)
     departure_date = Column(Date)
-    #status = Column(Enum("Active", "Cancelled", name="statuses"))
-    status = Column(Enum(StatusEnum))
+    status = Column(Enum("Active", "Cancelled", name="statuses"))
 
     def __repr__(self):
         return f"<Reservation(id='{self.id}', " \
