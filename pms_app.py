@@ -38,18 +38,19 @@ async def query_string(request):
     #session.add(reservation)
     #session.commit()
 
-    add_reservation(hotel_id, room_type, create_date_obj(arrival_date), create_date_obj(departure_date), status)
+    reservation_id = add_reservation(hotel_id, room_type, create_date_obj(arrival_date), create_date_obj(departure_date), status)
 
-    return json({"parsed": True, "args": request.args, "url": request.url, "query_string": request.query_string, "inserted_id": reservation.id})
+    return json({"parsed": True, "args": request.args, "url": request.url, "query_string": request.query_string, "inserted_id": reservation_id})
 
 def create_date_obj(date_string):
-    return datetime.datetime.strptime(date_string, '%d-%m-%Y')
+    return datetime.datetime.strptime(date_string, '%d/%m/%Y')
 
 def add_reservation(hotel_id, room_type, arrival_date, departure_date, status):
     session = get_db_session()
     reservation = Reservations(hotel_id=hotel_id, room_type=room_type, arrival_date=arrival_date, departure_date=departure_date, status=status)
     session.add(reservation)
     session.commit()
+    return reservation.id
 
 def add_hotel(session, hotel_name):
     hotel = Hotels(hotel_name=hotel_name)
