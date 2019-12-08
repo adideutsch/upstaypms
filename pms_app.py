@@ -43,7 +43,7 @@ async def query_string(request):
     return json({"parsed": True, "args": request.args, "url": request.url, "query_string": request.query_string, "inserted_id": reservation_id})
 
 def create_date_obj(date_string):
-    return datetime.datetime.strptime(date_string, '%d/%m/%Y')
+    return datetime.datetime.strptime(date_string, '%d-%m-%Y')
 
 def add_reservation(hotel_id, room_type, arrival_date, departure_date, status):
     session = get_db_session()
