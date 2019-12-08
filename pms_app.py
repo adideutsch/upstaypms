@@ -12,6 +12,9 @@ app.config.DB_USER = DB_USER
 
 @app.route("/add_hotel")
 async def add_hotel_endpoint(request):
+    """
+    Add a new hotel to the system
+    """
     hotel_name = request.args["hotel_name"][0]
     hotel_id = model.add_hotel(hotel_name)
     return json({"hotel_id": hotel_id})
@@ -19,6 +22,9 @@ async def add_hotel_endpoint(request):
 
 @app.route("/add_inventory")
 async def add_inventory_endpoint(request):
+    """
+    Add inventory to a given hotel
+    """
     hotel_id = request.args["hotel_id"][0]
     room_type = request.args["room_type"][0]
     room_inventory = request.args["room_inventory"][0]
@@ -28,6 +34,9 @@ async def add_inventory_endpoint(request):
 
 @app.route("/cancel_reservation")
 async def cancel_reservation_endpoint(request):
+    """
+    Cancel an existing reservation
+    """
     reservation_id = request.args["reservation_id"][0]
     model.cancel_reservation(reservation_id)
     return json({"success": True})
@@ -35,6 +44,9 @@ async def cancel_reservation_endpoint(request):
 
 @app.route("/add_reservation")
 async def add_reservation_endpoint(request):
+    """
+    Add a new reservation
+    """
     hotel_id = request.args["hotel_id"][0]
     room_type = request.args["room_type"][0]
     arrival_date = request.args["arrival_date"][0]
@@ -48,6 +60,9 @@ async def add_reservation_endpoint(request):
 
 @app.route("/get_reservation")
 async def get_reservation_endpoint(request):
+    """
+    Get an existing reservation
+    """
     reservation_id = request.args["reservation_id"][0]
     reservation_dict = model.get_reservation(reservation_id)
     return json(reservation_dict)
@@ -55,6 +70,9 @@ async def get_reservation_endpoint(request):
 
 @app.route("/list_inventory")
 async def list_inventory_endpoint(request):
+    """
+    List the inventory of a hotel in a specific date range
+    """
     hotel_id = request.args["hotel_id"][0]
     start_date = request.args["start_date"][0]
     end_date = request.args["end_date"][0]

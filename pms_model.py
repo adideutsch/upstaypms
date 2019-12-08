@@ -12,14 +12,23 @@ Base = declarative_base()
 
 
 def create_datetime_object(date_string):
+    """
+    Convert a string-formatted date into a datetime object
+    """
     return datetime.datetime.strptime(date_string, DATE_FORMAT).date()
 
 
-def generate_days_list(arrival_date, departure_date):
-    return list(map(lambda day: arrival_date+datetime.timedelta(day), range((departure_date-arrival_date).days)))
+def generate_days_list(start_date, end_date):
+    """
+    Create a list containing all the dates between start_date and end_date
+    """
+    return list(map(lambda day: start_date+datetime.timedelta(day), range((end_date-start_date).days)))
 
 
 class Reservations(Base):
+    """
+    Reservation of a hotel room
+    """
     __tablename__ = 'reservations'
     id = Column(Integer, primary_key=True)
     hotel_id = Column(Integer)
@@ -38,6 +47,9 @@ class Reservations(Base):
 
 
 def get_occupancy(hotel_id, date, room_type):
+    """
+    For a given hotel and room type at a certain date, return the amount of reserved rooms
+    """
     session = DBSession().get_db_session()
     return session.query(Reservations).filter(Reservations.arrival_date <= date)\
                                       .filter(Reservations.departure_date > date)\
@@ -48,6 +60,9 @@ def get_occupancy(hotel_id, date, room_type):
 
 
 def add_reservation(hotel_id, room_type, arrival_date, departure_date, status):
+    """
+    Add a new reservation to the system
+    """
     session = DBSession().get_db_session()
     # Check for invalid room type (doesn't exist in inventory for desired hotel)
     room_type_inventory = session.query(HotelInventory).filter(HotelInventory.hotel_id == hotel_id) \
@@ -75,6 +90,9 @@ def add_reservation(hotel_id, room_type, arrival_date, departure_date, status):
 
 
 def get_reservation(reservation_id):
+    """
+    Retrieve an existing reservation from the system
+    """
     session = DBSession().get_db_session()
     reservation = session.query(Reservations).get(reservation_id)
     return {"reservation_id": reservation.id,
@@ -86,6 +104,9 @@ def get_reservation(reservation_id):
 
 
 def cancel_reservation(reservation_id):
+    """
+    Cancel an existing reservation. Note: this will only change the reservation's status to "Cancelled".
+    """
     session = DBSession().get_db_session()
     reservation = session.query(Reservations).get(reservation_id)
     reservation.status = CANCELLED_STATUS
@@ -93,6 +114,9 @@ def cancel_reservation(reservation_id):
 
 
 def activate_reservation(reservation_id):
+    """
+    Activate an existing reservation. Note: this will only change the reservation's status to "Active".
+    """
     session = DBSession().get_db_session()
     # If this functionality ever becomes an endpoint to 3rd parties, make sure to check
     # availability in inventory before activating reservation
@@ -102,6 +126,9 @@ def activate_reservation(reservation_id):
 
 
 class Hotels(Base):
+    """
+    A Hotel facility
+    """
     __tablename__ = 'hotels'
     id = Column(Integer, primary_key=True)
     hotel_name = Column(String)
@@ -112,6 +139,9 @@ class Hotels(Base):
 
 
 def add_hotel(hotel_name):
+    """
+    Add a new hotel to the system
+    """
     session = DBSession().get_db_session()
     hotel = Hotels(hotel_name=hotel_name)
     session.add(hotel)
@@ -120,6 +150,9 @@ def add_hotel(hotel_name):
 
 
 class HotelInventory(Base):
+    """
+    The inventory size of a specific room type at a specific hotel
+    """
     __tablename__ = 'hotel_inventory'
     hotel_id = Column(Integer, primary_key=True)
     room_type = Column(String, primary_key=True)
@@ -132,6 +165,9 @@ class HotelInventory(Base):
 
 
 def add_inventory(hotel_id, room_type, room_inventory):
+    """
+    Add an inventory record to the system
+    """
     session = DBSession().get_db_session()
     # If this functionality ever becomes a real endpoint to 3rd parties, make sure to check
     # inventory for this room type, make sure it is new type
@@ -143,12 +179,19 @@ def add_inventory(hotel_id, room_type, room_inventory):
 
 
 def get_hotel_roomtypes(hotel_id):
+    """
+    Get a given hotel's room types
+    """
     session = DBSession().get_db_session()
     room_inventories = session.query(HotelInventory).filter(HotelInventory.hotel_id == hotel_id)
     return list(map(lambda room_inventory: room_inventory.room_type, room_inventories))
 
 
 def get_inventory(hotel_id, room_type):
+    """
+    Get the general inventory size of a specific room type at a specific hotel
+    Note: This doesn't take into account any existing reservations
+    """
     session = DBSession().get_db_session()
     room_type_inventory = session.query(HotelInventory).filter(HotelInventory.hotel_id == hotel_id) \
                                                        .filter(HotelInventory.room_type == room_type).first()
@@ -156,6 +199,9 @@ def get_inventory(hotel_id, room_type):
 
 
 def list_date_inventory(hotel_id, date):
+    """
+    Get the complete inventory of a specific date in a given hotel
+    """
     room_types = get_hotel_roomtypes(hotel_id)
     date_inventory = {}
     for room_type in room_types:
@@ -167,6 +213,9 @@ def list_date_inventory(hotel_id, date):
 
 
 def list_inventory(hotel_id, start_date, end_date):
+    """
+    Get the complete inventory of a specific date range in a given hotel
+    """
     # Check for invalid dates
     start_date = create_datetime_object(start_date)
     end_date = create_datetime_object(end_date)
@@ -177,4 +226,7 @@ def list_inventory(hotel_id, start_date, end_date):
 
 
 def create_tables(engine):
+    """
+    If any of the system tables does not exist, it will be created
+    """
     Base.metadata.create_all(engine)
