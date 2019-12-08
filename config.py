@@ -1,3 +1,5 @@
+DB_DIALECT = "postgresql"
+DB_DRIVER = "psycopg2"
 DB_SERVER = "35.223.245.72"
 DB_NAME = 'pmsdb'
 DB_USER = 'upstayapp'

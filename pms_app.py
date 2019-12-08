@@ -2,6 +2,8 @@ from sanic import Sanic
 from sanic.response import json
 
 from config import DB_SERVER, DB_NAME, DB_USER
+from pms_model import Hotels, HotelInventory, Reservations
+from db_utils import get_db_session
 
 app = Sanic('pms_app')
 app.config.DB_HOST = DB_SERVER
@@ -30,4 +32,17 @@ async def query_string(request):
 
     print(f"parsed info: hid:{hotel_id}, rtype:{room_type}, a_date:{arrival_date}, d_date:{departure_date}, status:{status}")
 
-    return json({"parsed": True, "args": request.args, "url": request.url, "query_string": request.query_string})
+    reservation = Reservations(hotel_id=hotel_id, room_type=room_type, arrival_date=arrival_date, departure_date=departure_date, status=status)
+    session = get_db_session()
+    session.add(reservation)
+    session.commit()
+
+    return json({"parsed": True, "args": request.args, "url": request.url, "query_string": request.query_string, "inserted_id": reservation.id})
+
+
+def add_hotel(session, hotel_name):
+    hotel = Hotels(hotel_name=hotel_name)
+    session.add(hotel)
+    session.commit()
+# session = get_db_session()
+# add_hotel(session=session, hotel_name="Leonardo Plaza Ashdod")
