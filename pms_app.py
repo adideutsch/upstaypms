@@ -1,5 +1,6 @@
 from sanic import Sanic
 from sanic.response import json
+import datetime
 
 from config import DB_SERVER, DB_NAME, DB_USER
 from pms_model import Hotels, HotelInventory, Reservations
@@ -32,13 +33,23 @@ async def query_string(request):
 
     print(f"parsed info: hid:{hotel_id}, rtype:{room_type}, a_date:{arrival_date}, d_date:{departure_date}, status:{status}")
 
-    reservation = Reservations(hotel_id=hotel_id, room_type=room_type, arrival_date=arrival_date, departure_date=departure_date, status=status)
-    session = get_db_session()
-    session.add(reservation)
-    session.commit()
+    #reservation = Reservations(hotel_id=hotel_id, room_type=room_type, arrival_date=arrival_date, departure_date=departure_date, status=status)
+    #session = get_db_session()
+    #session.add(reservation)
+    #session.commit()
+
+    add_reservation(hotel_id, room_type, create_date_obj(arrival_date), create_date_obj(departure_date), status)
 
     return json({"parsed": True, "args": request.args, "url": request.url, "query_string": request.query_string, "inserted_id": reservation.id})
 
+def create_date_obj(date_string):
+    return datetime.datetime.strptime(date_string, '%d-%m-%Y')
+
+def add_reservation(hotel_id, room_type, arrival_date, departure_date, status):
+    session = get_db_session()
+    reservation = Reservations(hotel_id=hotel_id, room_type=room_type, arrival_date=arrival_date, departure_date=departure_date, status=status)
+    session.add(reservation)
+    session.commit()
 
 def add_hotel(session, hotel_name):
     hotel = Hotels(hotel_name=hotel_name)
