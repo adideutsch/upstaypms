@@ -76,9 +76,7 @@ async def list_inventory_endpoint(request):
     hotel_id = request.args["hotel_id"][0]
     start_date = request.args["start_date"][0]
     end_date = request.args["end_date"][0]
-    print(f"running list_inventory with ({hotel_id}, {start_date}, {end_date})")
     inventory = model.list_inventory(hotel_id, start_date, end_date)
-    print("DONE")
     if inventory == model.OPERATION_ERROR_RETURN_CODE:
         return json({"success": False})
     return json({"success": True, "inventory": inventory})
